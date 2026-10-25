@@ -52,8 +52,10 @@ object Currencies {
     fun roundTo(v: Double, code: String): Double =
         BigDecimal(v).setScale(decimals(code), RoundingMode.HALF_UP).toDouble()
 
-    /** Plain positive number string for CSV (no symbol, point decimal separator). */
-    fun plain(v: Double): String = BigDecimal(v).stripTrailingZeros().toPlainString()
+    /** Plain positive number string for form fields and CSV (no symbol, point decimal separator).
+     *  Uses valueOf() so the double's shortest canonical representation is shown
+     *  (e.g. 123.67) — never its full binary expansion (123.66999999999998…). */
+    fun plain(v: Double): String = BigDecimal.valueOf(v).stripTrailingZeros().toPlainString()
 }
 
 object Dates {
