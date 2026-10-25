@@ -58,7 +58,7 @@ fun BalanceScreen(vm: AppViewModel) {
                 Text("OVERALL BALANCE", color = C.Faint, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.9.sp)
                 Text(Currencies.formatSigned(overall, cur), color = if (overall < 0) C.Expense else C.Income,
                     fontSize = 34.sp, fontWeight = FontWeight.Bold)
-                Text("across ${rows.size} month${if (rows.size > 1) "s" else ""} · home ledger only — trips excluded",
+                Text("accumulated across ${rows.size} month${if (rows.size > 1) "s" else ""} · home ledger only — trips excluded",
                     color = C.Mut, fontSize = 11.5.sp)
             }
             Spacer(Modifier.height(14.dp))
@@ -69,7 +69,7 @@ fun BalanceScreen(vm: AppViewModel) {
                         Text("IN", color = C.Faint, fontSize = 9.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
                         Text("OUT", color = C.Faint, fontSize = 9.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
                         Text("NET", color = C.Faint, fontSize = 9.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
-                        Text("BALANCE", color = C.Faint, fontSize = 9.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(1.1f))
+                        Text("CUM. BALANCE", color = C.Faint, fontSize = 9.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(1.1f))
                     }
                     rows.reversed().forEach { r -> BalanceRowItem(r, cur) }
                 }

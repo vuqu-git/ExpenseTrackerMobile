@@ -99,7 +99,7 @@ fun BottomBar(tab: Int, onSelect: (Int) -> Unit) {
                 selected = tab == t,
                 onClick = { onSelect(t) },
                 icon = { Icon(icon, null) },
-                label = { Text(label) },
+                label = { Text(label, maxLines = 1, fontSize = 11.sp) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = C.Pri,
                     unselectedIconColor = C.Mut,

@@ -74,6 +74,17 @@ fun TxFormScreen(vm: AppViewModel, editingId: Long?) {
             { v -> vm.updateTxForm { it.copy(direction = v) } },
             Modifier.padding(horizontal = 16.dp))
 
+        // Date
+        FieldLabel("Date *")
+        FieldShell(onClick = { showDate = true }) {
+            Icon(Icons.Rounded.CalendarMonth, null, tint = C.Mut, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(if (f.date.isBlank()) "Pick a date" else Dates.fmtDayFull(f.date),
+                color = if (f.date.isBlank()) C.Faint else C.Fg, fontSize = 14.5.sp,
+                modifier = Modifier.weight(1f))
+            Icon(Icons.Rounded.KeyboardArrowDown, null, tint = C.Faint, modifier = Modifier.size(20.dp))
+        }
+
         // Amount + adjacent calculator button (FR-TX-08)
         FieldLabel("Amount *")
         Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -110,17 +121,6 @@ fun TxFormScreen(vm: AppViewModel, editingId: Long?) {
             singleLine = false, minLines = 2,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-
-        // Date
-        FieldLabel("Date *")
-        FieldShell(onClick = { showDate = true }) {
-            Icon(Icons.Rounded.CalendarMonth, null, tint = C.Mut, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(if (f.date.isBlank()) "Pick a date" else Dates.fmtDayFull(f.date),
-                color = if (f.date.isBlank()) C.Faint else C.Fg, fontSize = 14.5.sp,
-                modifier = Modifier.weight(1f))
-            Icon(Icons.Rounded.KeyboardArrowDown, null, tint = C.Faint, modifier = Modifier.size(20.dp))
-        }
 
         Spacer(Modifier.height(16.dp))
         AppButton("Use template", { showTpl = true },
@@ -185,6 +185,18 @@ fun CalculatorDialog(initialAmount: String?, currency: String, onTransfer: (Doub
     val result = remember(expr) { if (expr.isBlank()) null else CalcEval.evaluate(expr) }
     val rounded = result?.let { Currencies.roundTo(it, currency) }
     val transferEnabled = rounded != null && rounded > 0
+    // Unfinished (not erroneous): ends with an operator / open paren, or has unbalanced parens.
+    val incomplete = remember(expr) {
+        val t = expr.trim()
+        if (t.isEmpty()) true else {
+            val last = t.last()
+            val endsOperator = last == '+' || last == '-' || last == '*' || last == '/' ||
+                last == '×' || last == '÷' || last == '('
+            var depth = 0
+            t.forEach { c -> if (c == '(') depth++ else if (c == ')') depth-- }
+            endsOperator || depth > 0
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(28.dp), color = C.DialogBg) {
@@ -196,6 +208,7 @@ fun CalculatorDialog(initialAmount: String?, currency: String, onTransfer: (Doub
                     val display = when {
                         expr.isBlank() -> ""
                         rounded != null -> Currencies.format(rounded, currency)
+                        incomplete -> ""
                         else -> "Error"
                     }
                     Text(display, color = if (transferEnabled) C.Income else C.ExpenseSoft, fontSize = 14.sp)
@@ -229,6 +242,23 @@ fun CalculatorDialog(initialAmount: String?, currency: String, onTransfer: (Doub
                         }
                     }
                     Spacer(Modifier.height(8.dp))
+                }
+                // "=" commits the current (intermediate) result into the expression,
+                // so the calculation can be continued from there.
+                Row(Modifier.fillMaxWidth()) {
+                    Box(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                            .background(C.S2)
+                            .clickable {
+                                val r = rounded
+                                if (r != null) expr = Currencies.plain(r)
+                            }
+                            .padding(vertical = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("=", color = if (rounded != null) C.Pri else C.Mut,
+                            fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
